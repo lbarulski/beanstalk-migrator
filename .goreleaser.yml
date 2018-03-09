@@ -1,0 +1,8 @@
+builds:
+  - binary: beanstalk-migrator
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
