@@ -66,6 +66,7 @@ func MoveJobs(sourceConnection, destinationConnection *beanstalk.Conn, wantedTub
 			readyCount, _ := strconv.Atoi(tubeStats["current-jobs-ready"])
 			buriedCount, _ := strconv.Atoi(tubeStats["current-jobs-buried"])
 
+			jobsBar.Set(0)
 			jobsBar.Total = int64(delayedCount + readyCount + buriedCount)
 			tubesBar.Prefix(fmt.Sprintf("Tubes [%s]", tubeName))
 		}
