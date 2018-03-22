@@ -7,6 +7,7 @@ import (
 )
 
 var quietFlag bool;
+var tubeNamePart string;
 
 var moveCmd = &cobra.Command{
 	Use:   "move",
@@ -20,11 +21,12 @@ Keeps body, pri, delay and ttr of the job.
 		sourceConnection, _ := beanstalk.Dial("tcp", srcAddr)
 		destinationConnection, _ := beanstalk.Dial("tcp", dstAddr)
 
-		migrator.MoveJobs(sourceConnection, destinationConnection,!quietFlag)
+		migrator.MoveJobs(sourceConnection, destinationConnection, tubeNamePart, !quietFlag)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(moveCmd)
 	moveCmd.Flags().BoolVarP(&quietFlag, "quiet", "q", false, "Don't show progress bar")
+	moveCmd.Flags().StringVarP(&tubeNamePart, "tube-name-part", "t", "", "Tubes to move are examined with simple check if it's name contains value of this parameter")
 }
