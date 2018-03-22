@@ -7,6 +7,7 @@ import (
 	"time"
 	"reflect"
 	"gopkg.in/cheggaaa/pb.v1"
+	"strings"
 )
 
 func getJob(conn *beanstalk.Conn, tubeName string) (uint64, []byte, error) {
@@ -25,7 +26,10 @@ func getJob(conn *beanstalk.Conn, tubeName string) (uint64, []byte, error) {
 	return 0, nil, JobsNotFoundError{fmt.Sprintf("No jobs found in all queues of tube '%s'", tubeName)}
 }
 
-func MoveJobs(sourceConnection, destinationConnection *beanstalk.Conn, useProgressBar bool) {
+/**
+ * wantedTubeNamePart == "" means that you want to move all tubes
+ */
+func MoveJobs(sourceConnection, destinationConnection *beanstalk.Conn, wantedTubeNamePart string, useProgressBar bool) {
 	tubes, err := sourceConnection.ListTubes()
 	if err != nil {
 		panic(err)
@@ -35,7 +39,19 @@ func MoveJobs(sourceConnection, destinationConnection *beanstalk.Conn, useProgre
 	var jobsBar *pb.ProgressBar
 	var barPool *pb.Pool
 	if (useProgressBar) {
-		tubesBar = pb.New(len(tubes)).Prefix("Tubes")
+		if "" != wantedTubeNamePart {
+			var wantedTubes []string;
+			for _, tubeName := range tubes {
+				if strings.Contains(tubeName, wantedTubeNamePart) {
+					wantedTubes = append(wantedTubes, tubeName);
+				}
+			}
+
+			tubes = wantedTubes
+		}
+
+		tubesCount := len(tubes)
+		tubesBar = pb.New(tubesCount).Prefix("Tubes")
 		jobsBar = pb.New(0).Prefix("Jobs")
 
 		barPool, _ = pb.StartPool(tubesBar, jobsBar)
